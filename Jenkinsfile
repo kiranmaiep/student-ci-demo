@@ -1,16 +1,35 @@
 pipeline {
   agent any
   options { timestamps(); timeout(time: 15, unit: 'MINUTES') }
+
   stages {
-    stage('Checkout'){ steps { checkout scm } }
-    stage('Build'){
+    stage('Checkout') {
+      steps { checkout scm }
+    }
+
+    stage('Build') {
       steps {
-        bash -lc 'rm -rf out && mkdir -p out && javac -d out src/hello/Hello.java'
+        bat """
+        if exist out rmdir /s /q out
+        mkdir out
+        javac -d out src\\hello\\Hello.java
+        """
       }
     }
-    stage('Run'){
-      steps { bash -lc 'java -cp out hello.Hello' }
+
+    stage('Run') {
+      steps {
+        bat """
+        java -cp out hello.Hello
+        echo Build_OK > artifact.txt
+        """
+      }
     }
   }
-  post { always { archiveArtifacts artifacts: 'out/**', allowEmptyArchive: false } }
+
+  post {
+    always {
+      archiveArtifacts artifacts: 'artifact.txt, out/**', allowEmptyArchive: false
+    }
+  }
 }

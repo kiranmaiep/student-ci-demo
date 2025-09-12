@@ -43,9 +43,11 @@ pipeline {
     }
   }
 
-  post {
-    always {
+ post {
+  always {
+    node('win') {       // or 'built-in'
       archiveArtifacts artifacts: 'artifact.txt, out/**', allowEmptyArchive: false
     }
   }
+}
 }
